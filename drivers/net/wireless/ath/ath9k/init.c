@@ -158,7 +158,7 @@ static const struct ieee80211_channel ath9k_5ghz_chantable[] = {
 	CHAN5G(5300, 64), /* Channel 60 */
 	CHAN5G(5320, 65), /* Channel 64 */
 	/* _We_ call this "Middle band" */
-	+	CHAN5G(5500, 66), /* Channel 100 */
+	CHAN5G(5500, 66), /* Channel 100 */
 	CHAN5G(5520, 67), /* Channel 104 */
 	CHAN5G(5540, 68), /* Channel 108 */
 	CHAN5G(5560, 69), /* Channel 112 */

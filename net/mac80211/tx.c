@@ -1373,8 +1373,12 @@ static int invoke_tx_handlers(struct ieee80211_tx_data *tx)
 	CALL_TXH(ieee80211_tx_h_ps_buf);
 	CALL_TXH(ieee80211_tx_h_check_control_port_protocol);
 	CALL_TXH(ieee80211_tx_h_select_key);
-	if (!ieee80211_hw_check(&tx->local->hw, HAS_RATE_CONTROL))
-		CALL_TXH(ieee80211_tx_h_rate_ctrl);
+	if (!(tx->local->hw.flags & IEEE80211_HW_HAS_RATE_CONTROL)) {
+		if (unlikely(info->control.use_preset_rate))
+			CALL_TXH(ieee80211_tx_h_rate_preset);
+		else
+			CALL_TXH(ieee80211_tx_h_rate_ctrl);
+	}
 
 	if (unlikely(info->flags & IEEE80211_TX_INTFL_RETRANSMISSION)) {
 		__skb_queue_tail(&tx->skbs, tx->skb);
@@ -1531,6 +1535,7 @@ static bool ieee80211_parse_tx_radiotap(struct sk_buff *skb)
 	struct ieee80211_tx_info *info = IEEE80211_SKB_CB(skb);
 	int ret = ieee80211_radiotap_iterator_init(&iterator, rthdr, skb->len,
 						   NULL);
+	u16 txflags;
 	u8 known, flags, mcs;
 
 	info->flags |= IEEE80211_TX_INTFL_DONT_ENCRYPT |
