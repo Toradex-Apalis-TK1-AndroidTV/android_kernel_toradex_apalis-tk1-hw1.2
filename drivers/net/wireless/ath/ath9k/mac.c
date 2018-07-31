@@ -146,7 +146,9 @@ void ath9k_hw_abort_tx_dma(struct ath_hw *ah)
 	REG_WRITE(ah, AR_Q_TXD, AR_Q_TXD_M);
 
 	REG_SET_BIT(ah, AR_PCU_MISC, AR_PCU_FORCE_QUIET_COLL | AR_PCU_CLEAR_VMF);
-	REG_SET_BIT(ah, AR_DIAG_SW, AR_DIAG_FORCE_CH_IDLE_HIGH);
+
+// CHANGES: do not clear disable physical carrier sense bit
+//	REG_CLR_BIT(ah, AR_DIAG_SW, AR_DIAG_FORCE_CH_IDLE_HIGH);
 	REG_SET_BIT(ah, AR_D_GBL_IFS_MISC, AR_D_GBL_IFS_MISC_IGNORE_BACKOFF);
 
 	for (q = 0; q < AR_NUM_QCU; q++) {

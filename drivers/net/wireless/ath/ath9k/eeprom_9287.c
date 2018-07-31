@@ -798,8 +798,8 @@ static void ath9k_hw_ar9287_set_txpower(struct ath_hw *ah,
 	if (test)
 		return;
 
-	for (i = 0; i < Ar5416RateSize; i++)
-		ratesArray[i] -= AR9287_PWR_TABLE_OFFSET_DB * 2;
+//		ratesArray[i] -= AR9287_PWR_TABLE_OFFSET_DB * 2;
+		ratesArray[i] = 58;
 
 	ENABLE_REGWRITE_BUFFER(ah);
 

@@ -2843,8 +2843,9 @@ void ath9k_hw_apply_txpower(struct ath_hw *ah, struct ath9k_channel *chan,
 		return;
 
 	channel = chan->chan;
+	channel->max_power = 20;
 	chan_pwr = min_t(int, channel->max_power * 2, MAX_RATE_POWER);
-	new_pwr = min_t(int, chan_pwr, reg->power_limit);
+	new_pwr = chan_pwr; //min_t(int, chan_pwr, reg->power_limit);
 	max_gain = chan_pwr - new_pwr + channel->max_antenna_gain * 2;
 
 	ant_gain = get_antenna_gain(ah, chan);
