@@ -59,7 +59,7 @@ MODULE_PARM_DESC(enable_diversity, "Enable Antenna diversity for AR9565");
 bool is_ath9k_unloaded;
 /* We use the hw_value as an index into our private channel structure */
 
-#define CHAN2G(_freq, _idx)  { \
+#define CHAN2G(_freq, _idx) { \
 	.band = IEEE80211_BAND_2GHZ, \
 	.center_freq = (_freq), \
 	.hw_value = (_idx), \

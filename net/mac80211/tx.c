@@ -798,7 +798,7 @@ ieee80211_tx_h_rate_preset(struct ieee80211_tx_data *tx)
 	return TX_CONTINUE;
 }
 
-+static ieee80211_tx_result debug_noinline
+static ieee80211_tx_result debug_noinline
 ieee80211_tx_h_sequence(struct ieee80211_tx_data *tx)
 {
 	struct ieee80211_tx_info *info = IEEE80211_SKB_CB(tx->skb);
@@ -1373,12 +1373,8 @@ static int invoke_tx_handlers(struct ieee80211_tx_data *tx)
 	CALL_TXH(ieee80211_tx_h_ps_buf);
 	CALL_TXH(ieee80211_tx_h_check_control_port_protocol);
 	CALL_TXH(ieee80211_tx_h_select_key);
-	if (!ieee80211_hw_check(&tx->local->hw, HAS_RATE_CONTROL)) {
-		if (unlikely(info->control.use_preset_rate))
-			CALL_TXH(ieee80211_tx_h_rate_preset);
-		else
-			CALL_TXH(ieee80211_tx_h_rate_ctrl);
-	}
+	if (!ieee80211_hw_check(&tx->local->hw, HAS_RATE_CONTROL))
+		CALL_TXH(ieee80211_tx_h_rate_ctrl);
 
 	if (unlikely(info->flags & IEEE80211_TX_INTFL_RETRANSMISSION)) {
 		__skb_queue_tail(&tx->skbs, tx->skb);
