@@ -172,28 +172,23 @@ static const struct ieee80211_regdomain world_regdom = {
 	.alpha2 =  "00",
 	.reg_rules = {
 		/* IEEE 802.11b/g, channels 1..11 */
-		REG_RULE(2412-10, 2462+10, 40, 6, 20, 0),
+		REG_RULE(2312-10, 2462+10, 40, 6, 30, 0),
 		/* IEEE 802.11b/g, channels 12..13. */
-		REG_RULE(2467-10, 2472+10, 40, 6, 20,
-			NL80211_RRF_PASSIVE_SCAN |
-			NL80211_RRF_NO_IBSS),
+		REG_RULE(2467-10, 2472+10, 40, 6, 30, 0),
 		/* IEEE 802.11 channel 14 - Only JP enables
 		 * this and for 802.11b only */
-		REG_RULE(2484-10, 2484+10, 20, 6, 20,
-			NL80211_RRF_PASSIVE_SCAN |
-			NL80211_RRF_NO_IBSS |
-			NL80211_RRF_NO_OFDM),
+		REG_RULE(2484-10, 2732+10, 40, 6, 30, 0),
 		/* IEEE 802.11a, channel 36..48 */
-		REG_RULE(5180-10, 5240+10, 80, 6, 20,
-                        NL80211_RRF_PASSIVE_SCAN |
-                        NL80211_RRF_NO_IBSS),
+		REG_RULE(4920-10, 5240+10, 160, 6, 30, 0),
 
-		/* NB: 5260 MHz - 5700 MHz requires DFS */
+ 		/* IEEE 802.11a, channel 52..64 - DFS required */
+		REG_RULE(5260-10, 5320+10, 160, 6, 30, 0),
 
-		/* IEEE 802.11a, channel 149..165 */
-		REG_RULE(5745-10, 5825+10, 80, 6, 20,
-			NL80211_RRF_PASSIVE_SCAN |
-			NL80211_RRF_NO_IBSS),
+ 		/* IEEE 802.11a, channel 100..144 - DFS required */
+		REG_RULE(5500-10, 5720+10, 160, 6, 30, 0),
+
+ 		/* IEEE 802.11a, channel 149..165 */
+		REG_RULE(5745-10, 6100+10, 160, 6, 30, 0),
 
 		/* IEEE 802.11ad (60gHz), channels 1..3 */
 		REG_RULE(56160+2160*1-1080, 56160+2160*3+1080, 2160, 0, 0, 0),
@@ -2328,6 +2323,35 @@ static void reg_timeout_work(struct work_struct *work)
 {
 	REG_DBG_PRINT("Timeout while waiting for CRDA to reply, restoring regulatory settings\n");
 	restore_regulatory_settings(true);
+}
+
+/*
+ * See http://www.fcc.gov/document/5-ghz-unlicensed-spectrum-unii, for
+ * UNII band definitions
+ */
+int cfg80211_get_unii(int freq)
+{
+	/* UNII-1 */
+	if (freq >= 4920 && freq <= 5250)
+		return 0;
+
+	/* UNII-2A */
+	if (freq > 5250 && freq <= 5350)
+		return 1;
+
+	/* UNII-2B */
+	if (freq > 5350 && freq <= 5470)
+		return 2;
+
+	/* UNII-2C */
+	if (freq > 5470 && freq <= 5725)
+		return 3;
+
+	/* UNII-3 */
+	if (freq > 5725 && freq <= 6100)
+		return 4;
+
+	return -EINVAL;
 }
 
 int __init regulatory_init(void)

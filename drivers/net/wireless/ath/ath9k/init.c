@@ -56,6 +56,11 @@ static int ath9k_enable_diversity;
 module_param_named(enable_diversity, ath9k_enable_diversity, int, 0444);
 MODULE_PARM_DESC(enable_diversity, "Enable Antenna diversity for AR9565");
 
+static int modparam_override_eeprom_regdomain = -1;
+module_param_named(override_eeprom_regdomain,
+		   modparam_override_eeprom_regdomain, int, 0444);
+MODULE_PARM_DESC(override_eeprom_regdomain, "Override regdomain hardcoded in EEPROM with this value (DANGEROUS).");
+
 bool is_ath9k_unloaded;
 /* We use the hw_value as an index into our private channel structure */
 
@@ -63,14 +68,14 @@ bool is_ath9k_unloaded;
 	.band = IEEE80211_BAND_2GHZ, \
 	.center_freq = (_freq), \
 	.hw_value = (_idx), \
-	.max_power = 20, \
+	.max_power = 30, \
 }
 
 #define CHAN5G(_freq, _idx) { \
 	.band = IEEE80211_BAND_5GHZ, \
 	.center_freq = (_freq), \
 	.hw_value = (_idx), \
-	.max_power = 20, \
+	.max_power = 30, \
 }
 
 /* Some 2 GHz radios are actually tunable on 2312-2732
@@ -78,6 +83,27 @@ bool is_ath9k_unloaded;
  * we have calibration data for all cards though to make
  * this static */
 static const struct ieee80211_channel ath9k_2ghz_chantable[] = {
+	CHAN2G(2312, 34), /* Channel -19 */
+	CHAN2G(2317, 35), /* Channel -18 */
+	CHAN2G(2322, 36), /* Channel -17 */
+	CHAN2G(2327, 37), /* Channel -16 */
+	CHAN2G(2332, 38), /* Channel -15 */
+	CHAN2G(2337, 39), /* Channel -14 */
+	CHAN2G(2342, 40), /* Channel -13 */
+	CHAN2G(2347, 41), /* Channel -12 */
+	CHAN2G(2352, 42), /* Channel -11 */
+	CHAN2G(2357, 43), /* Channel -10 */
+	CHAN2G(2362, 44), /* Channel -9 */
+	CHAN2G(2367, 45), /* Channel -8 */
+	CHAN2G(2372, 46), /* Channel -7 */
+	CHAN2G(2377, 47), /* Channel -6 */
+	CHAN2G(2382, 48), /* Channel -5 */
+	CHAN2G(2387, 49), /* Channel -4 */
+	CHAN2G(2392, 50), /* Channel -3 */
+	CHAN2G(2397, 51), /* Channel -2 */
+	CHAN2G(2402, 52), /* Channel -1 */
+	CHAN2G(2407, 53), /* Channel 0 */
+
 	CHAN2G(2412, 0), /* Channel 1 */
 	CHAN2G(2417, 1), /* Channel 2 */
 	CHAN2G(2422, 2), /* Channel 3 */
@@ -91,7 +117,29 @@ static const struct ieee80211_channel ath9k_2ghz_chantable[] = {
 	CHAN2G(2462, 10), /* Channel 11 */
 	CHAN2G(2467, 11), /* Channel 12 */
 	CHAN2G(2472, 12), /* Channel 13 */
-	CHAN2G(2484, 13), /* Channel 14 */
+	CHAN2G(2477, 13), /* Channel XX */
+	CHAN2G(2478, 14), /* Channel XX */
+	CHAN2G(2482, 15), /* Channel XX */
+
+	CHAN2G(2484, 16), /* Channel 14 */
+
+	CHAN2G(2487, 17), /* Channel XX */
+	CHAN2G(2489, 18), /* Channel XX */
+	CHAN2G(2492, 19), /* Channel XX */
+	CHAN2G(2494, 20), /* Channel XX */
+	CHAN2G(2497, 21), /* Channel XX */
+	CHAN2G(2499, 22), /* Channel XX */
+	CHAN2G(2512, 23), /* Channel XX */
+	CHAN2G(2532, 24), /* Channel XX */
+	CHAN2G(2572, 25), /* Channel XX */
+	CHAN2G(2592, 26), /* Channel XX */
+	CHAN2G(2612, 27), /* Channel XX */
+	CHAN2G(2632, 28), /* Channel XX */
+	CHAN2G(2652, 29), /* Channel XX */
+	CHAN2G(2672, 30), /* Channel XX */
+	CHAN2G(2692, 31), /* Channel XX */
+	CHAN2G(2712, 32), /* Channel XX */
+	CHAN2G(2732, 33), /* Channel XX */
 };
 
 /* Some 5 GHz radios are actually tunable on XXXX-YYYY
@@ -99,34 +147,38 @@ static const struct ieee80211_channel ath9k_2ghz_chantable[] = {
  * we have calibration data for all cards though to make
  * this static */
 static const struct ieee80211_channel ath9k_5ghz_chantable[] = {
+	CHAN5G(4920, 54), /* Channel XX */
+	CHAN5G(4940, 55), /* Channel XX */
+	CHAN5G(4960, 56), /* Channel XX */
+	CHAN5G(4980, 57), /* Channel XX */
 	/* _We_ call this UNII 1 */
-	CHAN5G(5180, 14), /* Channel 36 */
-	CHAN5G(5200, 15), /* Channel 40 */
-	CHAN5G(5220, 16), /* Channel 44 */
-	CHAN5G(5240, 17), /* Channel 48 */
+	CHAN5G(5180, 58), /* Channel 36 */
+	CHAN5G(5200, 59), /* Channel 40 */
+	CHAN5G(5220, 60), /* Channel 44 */
+	CHAN5G(5240, 61), /* Channel 48 */
 	/* _We_ call this UNII 2 */
-	CHAN5G(5260, 18), /* Channel 52 */
-	CHAN5G(5280, 19), /* Channel 56 */
-	CHAN5G(5300, 20), /* Channel 60 */
-	CHAN5G(5320, 21), /* Channel 64 */
+	CHAN5G(5260, 62), /* Channel 52 */
+	CHAN5G(5280, 63), /* Channel 56 */
+	CHAN5G(5300, 64), /* Channel 60 */
+	CHAN5G(5320, 65), /* Channel 64 */
 	/* _We_ call this "Middle band" */
-	CHAN5G(5500, 22), /* Channel 100 */
-	CHAN5G(5520, 23), /* Channel 104 */
-	CHAN5G(5540, 24), /* Channel 108 */
-	CHAN5G(5560, 25), /* Channel 112 */
-	CHAN5G(5580, 26), /* Channel 116 */
-	CHAN5G(5600, 27), /* Channel 120 */
-	CHAN5G(5620, 28), /* Channel 124 */
-	CHAN5G(5640, 29), /* Channel 128 */
-	CHAN5G(5660, 30), /* Channel 132 */
-	CHAN5G(5680, 31), /* Channel 136 */
-	CHAN5G(5700, 32), /* Channel 140 */
+	CHAN5G(5500, 66), /* Channel 100 */
+	CHAN5G(5520, 67), /* Channel 104 */
+	CHAN5G(5540, 68), /* Channel 108 */
+	CHAN5G(5560, 69), /* Channel 112 */
+	CHAN5G(5580, 70), /* Channel 116 */
+	CHAN5G(5600, 71), /* Channel 120 */
+	CHAN5G(5620, 72), /* Channel 124 */
+	CHAN5G(5640, 73), /* Channel 128 */
+	CHAN5G(5660, 74), /* Channel 132 */
+	CHAN5G(5680, 75), /* Channel 136 */
+	CHAN5G(5700, 76), /* Channel 140 */
 	/* _We_ call this UNII 3 */
-	CHAN5G(5745, 33), /* Channel 149 */
-	CHAN5G(5765, 34), /* Channel 153 */
-	CHAN5G(5785, 35), /* Channel 157 */
-	CHAN5G(5805, 36), /* Channel 161 */
-	CHAN5G(5825, 37), /* Channel 165 */
+	CHAN5G(5745, 77), /* Channel 149 */
+	CHAN5G(5765, 78), /* Channel 153 */
+	CHAN5G(5785, 79), /* Channel 157 */
+	CHAN5G(5805, 80), /* Channel 161 */
+	CHAN5G(5825, 81), /* Channel 165 */
 };
 
 /* Atheros hardware rate code addition for short premble */
@@ -759,6 +811,21 @@ void ath9k_set_hw_capab(struct ath_softc *sc, struct ieee80211_hw *hw)
 {
 	struct ath_hw *ah = sc->sc_ah;
 	struct ath_common *common = ath9k_hw_common(ah);
+
+	if (modparam_override_eeprom_regdomain != -1) {
+#ifdef CONFIG_CFG80211_CERTIFICATION_ONUS
+		struct ath_regulatory *regulatory = ath9k_hw_regulatory(sc->sc_ah);
+		printk(KERN_ERR "ath9k: DANGER! You're overriding EEPROM-defined regulatory domain,"
+		       "\nfrom: 0x%x to 0x%x\n",
+		       regulatory->current_rd, modparam_override_eeprom_regdomain);
+		printk(KERN_ERR "ath9k: Your card was not certified to operate in the domain you chose.\n");
+		printk(KERN_ERR "ath9k: This might result in a violation of your local regulatory rules.\n");
+		printk(KERN_ERR "ath9k: Do not ever do this unless you really know what you are doing!\n");
+		regulatory->current_rd = modparam_override_eeprom_regdomain;
+#else
+		printk(KERN_ERR "ath9k: ERROR:  override_eeprom_regdomain request will be ignored because CF80211_CERTIFICATION_ONUS was not selected when compiling the kernel.\n");
+#endif
+	}
 
 	hw->flags = IEEE80211_HW_RX_INCLUDES_FCS |
 		IEEE80211_HW_HOST_BROADCAST_PS_BUFFERING |
